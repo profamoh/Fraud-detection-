@@ -72,8 +72,12 @@ def load_or_train_model(df):
 
 # Predict fraudulent transactions
 def predict_fraud(model, input_data):
-    prediction = model.predict(input_data)
-    return prediction
+    try:
+        prediction = model.predict(input_data)
+        return prediction
+    except Exception as e:
+        st.error(f"Prediction error: {e}")
+        return None
 
 # Data analysis and visualization function
 def data_analysis(df):
@@ -102,7 +106,7 @@ def about():
     - **Fraud Detection:** Predict the fraudulent nature of credit card transactions.
     - **Visualization:** Provides graphical representation of fraud vs. non-fraud transactions.
 
-    By Donald Taye
+    For any issues regarding the functionality of the application, please contact Jonathan Pollyn.
     """)
 
 # Data exploration section
@@ -147,9 +151,9 @@ def predict_page():
             transaction_df = pd.DataFrame([transaction])
             if "model" in st.session_state:
                 model = st.session_state["model"]
-                prediction = predict_fraud(model, transaction_df)[0]
+                prediction = predict_fraud(model, transaction_df)
 
-                if prediction == 1:
+                if prediction is not None and prediction[0] == 1:
                     st.warning("**Fraudulent Transaction Detected!** The card is temporarily limited.")
                 else:
                     st.success("**Transaction is Non-Fraudulent.** The card is allowed to proceed.")
