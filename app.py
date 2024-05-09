@@ -106,7 +106,7 @@ def about():
     - **Fraud Detection:** Predict the fraudulent nature of credit card transactions.
     - **Visualization:** Provides graphical representation of fraud vs. non-fraud transactions.
 
-    For any issues regarding the functionality of the application, please contact Jonathan Pollyn.
+    By Donald Taye
     """)
 
 # Data exploration section
@@ -128,27 +128,30 @@ def data_exploration():
 
         data_analysis(df)
 
-# Fraud prediction page with only specified card details
+# Fraud prediction page with all specified features
 def predict_page():
     st.markdown("<h1 style='text-align: center; color: white; background-color: blue;'>Fraud Detection System</h1>", unsafe_allow_html=True)
     st.write("## Enter Card Details for Fraud Prediction")
 
-    card_holder_name = st.text_input("Card Holder Name")
-    card_number = st.text_input("Card Number", type='password')
-    cvc = st.text_input("CVC", type='password')
-    expiry_date = st.text_input("Date of Expiry (MM/YY)")
+    transaction_id = st.text_input("Transaction ID")
+    amount = st.number_input("Amount", min_value=0.0, step=0.01)
+    time = st.number_input("Time", min_value=0.0, step=1.0)
+    features = {f"V{i}": st.number_input(f"V{i}", value=0.0) for i in range(1, 29)}
 
+    # Include the 'Time' column and other specified features
     transaction = {
-        "Card Holder Name": card_holder_name,
-        "Card Number": card_number,
-        "CVC": cvc,
-        "Date of Expiry": expiry_date
+        "id": transaction_id,
+        "Time": time,
+        **features,
+        "Amount": amount
     }
 
     if st.button("Predict Fraud"):
-        if all(transaction.values()):
-            # Example conversion to a data frame to match the model input format
+        if all([transaction_id, *features.values(), amount, time]):
+            # Conversion to DataFrame to match model input format
             transaction_df = pd.DataFrame([transaction])
+
+            # Ensure 'Class' column is not included in the prediction input
             if "model" in st.session_state:
                 model = st.session_state["model"]
                 prediction = predict_fraud(model, transaction_df)
@@ -160,7 +163,7 @@ def predict_page():
             else:
                 st.warning("Model not loaded. Please explore data and train the model first.")
         else:
-            st.error("Please fill in all card details.")
+            st.error("Please fill in all transaction details.")
 
 # Dashboard navigation
 def dashboard():
